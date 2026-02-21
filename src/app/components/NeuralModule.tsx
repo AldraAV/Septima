@@ -14,6 +14,9 @@ import {
 import { Zap, Brain, RefreshCw, Cpu, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { useODE } from '../../hooks/useBinaryEngine';
 import type { ODESimulationRequest } from '../../services/binaryTypes';
+import { ExportButton } from './ExportButton';
+import { QuizCard } from './QuizCard';
+import { buildExportHandlers } from '../../utils/exportUtils';
 
 // ─── Estilos ────────────────────────────────────────────────────────────────────
 const PANEL: React.CSSProperties = {
@@ -165,6 +168,13 @@ export function NeuralModule() {
           style={{ background: `${engineColor}15`, border: `1px solid ${engineColor}30`, color: engineColor }}>
           <Cpu size={11} />{engineLabel}
         </div>
+        {!loading && data && (
+          <ExportButton
+            accentColor="#e879f9"
+            onExportCSV={buildExportHandlers(data, ['V (mV)','m','h','n'],{ model:'hodgkin_huxley', engine: engineSource ?? 'local', params:{ I_ext, g_Na, g_K } },'neural-chart').onExportCSV}
+            onExportPNG={buildExportHandlers(data, ['V (mV)','m','h','n'],{ model:'hodgkin_huxley', engine: engineSource ?? 'local', params:{ I_ext, g_Na, g_K } },'neural-chart').onExportPNG}
+          />
+        )}
       </div>
 
       <div className="flex gap-4 flex-1 overflow-hidden">
@@ -233,7 +243,7 @@ export function NeuralModule() {
           </div>
 
           {/* Gráfica Vm principal */}
-          <div className="flex-1 rounded-2xl overflow-hidden relative" style={{ background: '#040d1e', border: '1px solid rgba(255,255,255,0.07)', minHeight: 200 }}>
+          <div id="neural-chart" className="flex-1 rounded-2xl overflow-hidden relative" style={{ background: '#040d1e', border: '1px solid rgba(255,255,255,0.07)', minHeight: 200 }}>
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: 'rgba(4,13,30,0.65)', backdropFilter: 'blur(4px)' }}>
                 <div className="flex items-center gap-2 text-[#FF2E63] text-sm font-mono">
@@ -290,11 +300,17 @@ export function NeuralModule() {
           <div className="rounded-xl p-3 flex gap-3 items-start" style={{ background: 'rgba(255,46,99,0.04)', border: '1px solid rgba(255,46,99,0.12)' }}>
             <Info size={13} style={{ color: '#FF2E63', flexShrink: 0, marginTop: 2 }} />
             <p className="text-[#94A3B8] text-[11px] leading-relaxed">
-              <span className="text-[#FF2E63] font-semibold">Hodgkin & Huxley (1952 · Premio Nobel):</span>{' '}
+              <span className="text-[#FF2E63] font-semibold">Hodgkin &amp; Huxley (1952 · Premio Nobel):</span>{' '}
               Modelo de 4 ecuaciones que describe cómo las corrientes iónicas de Na⁺ y K⁺ generan el potencial de acción nervioso.
               <em> m</em> activa rápido el Na⁺, <em>h</em> lo inactiva, <em>n</em> activa lento el K⁺ para repolarizar.
             </p>
           </div>
+
+          {/* Quiz Adaptativo */}
+          <QuizCard
+            accentColor="#e879f9"
+            context={`Modelo Hodgkin-Huxley. I_ext=${I_ext} µA/cm², g_Na=${g_Na} mS/cm², g_K=${g_K} mS/cm². Potencial pico=${peakV}mV. Potenciales de acción=${actionPotentials}.`}
+          />
         </div>
       </div>
     </div>

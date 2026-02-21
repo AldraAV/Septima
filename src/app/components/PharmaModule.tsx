@@ -14,6 +14,9 @@ import {
 import { Pill, Cpu, RefreshCw, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { useODE } from '../../hooks/useBinaryEngine';
 import type { ODESimulationRequest } from '../../services/binaryTypes';
+import { ExportButton } from './ExportButton';
+import { QuizCard } from './QuizCard';
+import { buildExportHandlers } from '../../utils/exportUtils';
 
 // ─── Presets de fármacos reales ─────────────────────────────────────────────────
 const DRUGS = {
@@ -169,6 +172,13 @@ export function PharmaModule() {
           style={{ background: `${engineColor}15`, border: `1px solid ${engineColor}30`, color: engineColor }}>
           <Cpu size={11}/>{engineLabel}
         </div>
+        {!loading && data && (
+          <ExportButton
+            accentColor={drug.color}
+            onExportCSV={buildExportHandlers(data, ['A_gut (mg)', 'C plasma (mg/L)'], { model: 'compartment_pk', engine: engineSource ?? 'local', params: { dose, ka, ke, Vd, F } }, 'pk-chart').onExportCSV}
+            onExportPNG={buildExportHandlers(data, ['A_gut (mg)', 'C plasma (mg/L)'], { model: 'compartment_pk', engine: engineSource ?? 'local', params: { dose, ka, ke, Vd, F } }, 'pk-chart').onExportPNG}
+          />
+        )}
       </div>
 
       <div className="flex gap-4 flex-1 overflow-hidden">
@@ -255,7 +265,7 @@ export function PharmaModule() {
           </div>
 
           {/* Gráfica principal */}
-          <div className="flex-1 rounded-2xl overflow-hidden relative" style={{ background: '#040d1e', border: '1px solid rgba(255,255,255,0.07)', minHeight: 280 }}>
+          <div id="pk-chart" className="flex-1 rounded-2xl overflow-hidden relative" style={{ background: '#040d1e', border: '1px solid rgba(255,255,255,0.07)', minHeight: 280 }}>
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: 'rgba(4,13,30,0.65)', backdropFilter: 'blur(4px)' }}>
                 <div className="flex items-center gap-2 font-mono text-sm" style={{ color: drug.color }}>
@@ -300,6 +310,12 @@ export function PharmaModule() {
               garantiza eficacia antimicrobiana. Por encima del nivel tóxico se producen efectos adversos.
             </p>
           </div>
+
+          {/* Quiz Adaptativo */}
+          <QuizCard
+            accentColor={drug.color}
+            context={`Farmacocinética ${drug.label}. ka=${ka}/h, ke=${ke}/h, Vd=${Vd}L, F=${F}. Régimen: ${regimen}, ${nDoses} dosis de ${dose}mg c/${interval}h. Cmax=${Cmax} mg/L, t½=${halfLife}h, cobertura MIC=${coverage}%.`}
+          />
         </div>
       </div>
     </div>
