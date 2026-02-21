@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Séptima Dashboard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-slate-100 flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 sticky top-0 z-50">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<!-- Brand -->
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-2xl">cardiology</span>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Séptima</h1>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button aria-label="Ayuda" class="p-2 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button aria-label="Configuración" class="p-2 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1"></div>
+<button class="flex items-center gap-2 pl-2">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shadow-md shadow-primary/20">
+                        JM
+                    </div>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center py-12 px-6">
+<div class="w-full max-w-5xl flex flex-col gap-10">
+<!-- Greeting Section -->
+<div class="text-center space-y-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 mb-2 border border-blue-100 dark:border-blue-800">
+                    Panel de Estudiante
+                </span>
+<h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    Bienvenido, José
+                </h2>
+<p class="text-lg text-slate-500 dark:text-slate-400 font-medium">
+                    Sistema Cardiovascular en desarrollo
+                </p>
+</div>
+<!-- Modules Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+<!-- Card 1: Cardiovascular (Active) -->
+<div class="group relative flex flex-col bg-white dark:bg-slate-800 rounded-xl border-2 border-primary/20 hover:border-primary shadow-lg shadow-primary/5 transition-all duration-300 cursor-pointer overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<span class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+<span class="material-symbols-outlined text-lg font-bold">check</span>
+</span>
+</div>
+<div class="h-48 w-full bg-gradient-to-b from-primary/5 to-transparent flex items-center justify-center" data-alt="Abstract medical heart visualization">
+<div class="p-4 bg-white dark:bg-slate-700 rounded-full shadow-sm text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-5xl">ecg_heart</span>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold uppercase tracking-wider text-primary">Módulo 1</span>
+<span class="h-1 w-1 rounded-full bg-slate-300"></span>
+<span class="text-xs font-medium text-slate-500">En progreso</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Cardiovascular</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Anatomía, fisiología y patologías del corazón y vasos sanguíneos.</p>
+<div class="mt-4 flex items-center text-sm font-semibold text-primary">
+                            Continuar lección <span class="material-symbols-outlined text-lg ml-1 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Nervioso (Locked/Next) -->
+<div class="group relative flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100 transition-opacity duration-300 cursor-not-allowed">
+<div class="absolute top-0 right-0 p-4">
+<span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 dark:bg-slate-700 dark:text-slate-300">
+                            Próximo
+                        </span>
+</div>
+<div class="h-48 w-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center" data-alt="Abstract brain visualization placeholder">
+<div class="p-4 bg-slate-200 dark:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined text-5xl">neurology</span>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Módulo 2</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Nervioso</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Estructura y función del sistema nervioso central y periférico.</p>
+<div class="mt-4 flex items-center text-sm font-medium text-slate-400">
+<span class="material-symbols-outlined text-lg mr-2">lock</span> Bloqueado
+                        </div>
+</div>
+</div>
+<!-- Card 3: Respiratorio (Locked/Next) -->
+<div class="group relative flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100 transition-opacity duration-300 cursor-not-allowed">
+<div class="absolute top-0 right-0 p-4">
+<span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 dark:bg-slate-700 dark:text-slate-300">
+                            Próximo
+                        </span>
+</div>
+<div class="h-48 w-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center" data-alt="Abstract lungs visualization placeholder">
+<div class="p-4 bg-slate-200 dark:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined text-5xl">pulmonology</span>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Módulo 3</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Respiratorio</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Mecánica ventilatoria e intercambio gaseoso.</p>
+<div class="mt-4 flex items-center text-sm font-medium text-slate-400">
+<span class="material-symbols-outlined text-lg mr-2">lock</span> Bloqueado
+                        </div>
+</div>
+</div>
+</div>
+<!-- Progress Section -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm mt-4">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Progreso General</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Completitud del curso actual</p>
+</div>
+<div class="text-3xl font-extrabold text-primary">80%</div>
+</div>
+<div class="relative w-full h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-1000 ease-out" style="width: 80%;">
+<div class="absolute inset-0 bg-white/20 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"></div>
+</div>
+</div>
+<div class="flex justify-between mt-3 text-xs text-slate-400 font-medium">
+<span>Inicio</span>
+<span>Meta Final</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Simple -->
+<footer class="w-full py-6 text-center text-slate-400 text-sm">
+<p>© 2023 Séptima Educación Médica. Todos los derechos reservados.</p>
+</footer>
+</body></html>

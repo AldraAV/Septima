@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Microcontroller Emulator - Séptima</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#135bec",
+                        "primary-dark": "#0e46b9",
+                        "primary-light": "#eef4ff",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "slate-850": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Manrope", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        /* Custom Scrollbar for code editor */
+        .code-editor::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .code-editor::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .code-editor::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        .code-editor::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Syntax Highlighting Simulation */
+        .syntax-keyword { color: #d73a49; } /* void, int, float */
+        .syntax-func { color: #6f42c1; } /* setup, loop, analogRead */
+        .syntax-obj { color: #005cc5; } /* Serial */
+        .syntax-str { color: #032f62; } /* strings */
+        .syntax-num { color: #005cc5; } /* numbers */
+        .syntax-comment { color: #6a737d; font-style: italic; }
+
+        /* Oscilloscope Grid Background */
+        .oscilloscope-grid {
+            background-image: 
+                linear-gradient(to right, rgba(19, 91, 236, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(19, 91, 236, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .oscilloscope-grid-major {
+            background-image: 
+                linear-gradient(to right, rgba(19, 91, 236, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(19, 91, 236, 0.2) 1px, transparent 1px);
+            background-size: 200px 200px;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-900 antialiased flex flex-col h-screen overflow-hidden">
+<!-- Top Navigation -->
+<header class="flex-none flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 bg-white px-6 py-3 z-20">
+<div class="flex items-center gap-4 text-slate-900">
+<div class="size-8 text-primary flex items-center justify-center bg-primary-light rounded-lg">
+<span class="material-symbols-outlined text-2xl">ecg_heart</span>
+</div>
+<h2 class="text-slate-900 text-lg font-bold leading-tight tracking-[-0.015em]">Séptima</h2>
+<div class="h-6 w-px bg-slate-200 mx-2"></div>
+<nav class="flex items-center gap-2 text-sm">
+<a class="text-slate-500 hover:text-primary transition-colors" href="#">Cardiovascular</a>
+<span class="text-slate-400">/</span>
+<span class="text-slate-900 font-semibold">Programación Microcontrolador</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-200">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+</span>
+                Dispositivo Conectado
+            </div>
+<button class="flex items-center justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="flex items-center justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-8 w-px bg-slate-200 mx-1"></div>
+<button class="flex items-center gap-2 pl-2">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-8 ring-2 ring-white shadow-sm" data-alt="Portrait of a young woman with a neutral expression" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDJyDC9dLx8YVeYf5gk5oXZb69KMV3QdjUZyBEPqCFrR-5ezdqtZ4RBDL1KY9VYkhTGgARzY3izkWPL9AGIrcXfpAcQljkl8zztDuJgAuSMPQ5KBpTUxKy58qItu_thIQw8gYTLlYq_y0icg79Cixf8NHker95TYfeqjoaqb1c-6cRXlYtocXU1YEeNgmpYxuiMsnfhcws0qP_nzVjQ4iA4EgKhLXOLwh8qnX6FQnr91WhlgahwlGwjRPDVsbQlI4oZ5-JHoURb5xw");'></div>
+<div class="hidden lg:flex flex-col items-start">
+<span class="text-xs font-bold text-slate-900">Ana García</span>
+<span class="text-[10px] text-slate-500">Ingeniería Biomédica</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area (Split Screen) -->
+<main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+<!-- Left Pane: Code Editor -->
+<div class="flex flex-col w-full md:w-1/2 lg:w-[45%] border-r border-slate-200 bg-white relative z-10 shadow-lg md:shadow-none">
+<!-- Editor Toolbar -->
+<div class="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-slate-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400 text-xl">code</span>
+<span class="text-sm font-semibold text-slate-700">main.cpp</span>
+<span class="text-xs text-slate-400 italic flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">save</span> Guardado
+                    </span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1.5 hover:bg-white hover:shadow-sm rounded text-slate-500" title="Copiar código">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+<button class="p-1.5 hover:bg-white hover:shadow-sm rounded text-slate-500" title="Deshacer">
+<span class="material-symbols-outlined text-lg">undo</span>
+</button>
+<button class="p-1.5 hover:bg-white hover:shadow-sm rounded text-slate-500" title="Rehacer">
+<span class="material-symbols-outlined text-lg">redo</span>
+</button>
+<div class="h-4 w-px bg-slate-300 mx-1"></div>
+<button class="p-1.5 hover:bg-white hover:shadow-sm rounded text-slate-500" title="Configuración">
+<span class="material-symbols-outlined text-lg">settings_applications</span>
+</button>
+</div>
+</div>
+<!-- Code Editor Area -->
+<div class="flex-1 relative overflow-hidden flex bg-white font-mono text-sm leading-6">
+<!-- Line Numbers -->
+<div class="w-12 bg-slate-50 text-slate-400 text-right pr-3 pt-4 select-none border-r border-slate-100 flex flex-col gap-0.5">
+<div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div>
+</div>
+<!-- Code Content -->
+<div class="flex-1 p-4 pt-4 code-editor overflow-auto whitespace-pre">
+<span class="syntax-keyword">void</span> <span class="syntax-func">setup</span>() {
+  <span class="syntax-comment">// Iniciar comunicación serial para depuración</span>
+<span class="syntax-obj">Serial</span>.<span class="syntax-func">begin</span>(<span class="syntax-num">9600</span>);
+}
+
+<span class="syntax-keyword">void</span> <span class="syntax-func">loop</span>() {
+  <span class="syntax-comment">// Leer el valor del pin analógico A0 (0-1023)</span>
+<span class="syntax-keyword">int</span> sensorValue = <span class="syntax-func">analogRead</span>(A0);
+  
+  <span class="syntax-comment">// Convertir la lectura analógica (0 - 1023) a voltaje (0 - 5V)</span>
+<span class="syntax-keyword">float</span> voltage = sensorValue * (<span class="syntax-num">5.0</span> / <span class="syntax-num">1023.0</span>);
+  
+  <span class="syntax-comment">// Imprimir el voltaje en el Monitor Serial</span>
+<span class="syntax-obj">Serial</span>.<span class="syntax-func">println</span>(voltage);
+  
+  <span class="syntax-comment">// Esperar 10 milisegundos para estabilidad</span>
+<span class="syntax-func">delay</span>(<span class="syntax-num">10</span>);
+}</div>
+</div>
+<!-- Console / Terminal -->
+<div class="h-32 bg-slate-900 text-slate-300 font-mono text-xs border-t border-slate-200 flex flex-col">
+<div class="flex items-center justify-between px-3 py-1 bg-slate-800 text-slate-400 border-b border-slate-700">
+<span class="uppercase tracking-wider font-bold text-[10px]">Salida Serial (9600 baud)</span>
+<button class="hover:text-white"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+<div class="flex-1 p-3 overflow-y-auto">
+<div class="opacity-50 mb-1">Compilación exitosa...</div>
+<div class="opacity-50 mb-1">Subiendo al dispositivo...</div>
+<div class="text-green-400 mb-1">Carga completada.</div>
+<div>0.00</div>
+<div>0.01</div>
+<div>0.02</div>
+<div>0.05</div>
+</div>
+</div>
+</div>
+<!-- Right Pane: Oscilloscope & Controls -->
+<div class="flex-1 flex flex-col bg-background-light p-4 gap-4 overflow-y-auto">
+<!-- Oscilloscope Container -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-[400px]">
+<!-- Oscilloscope Header -->
+<div class="flex flex-wrap items-center justify-between px-5 py-3 border-b border-slate-100">
+<h3 class="font-bold text-slate-800 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">ssid_chart</span>
+                        Osciloscopio Digital
+                    </h3>
+<div class="flex items-center gap-4 text-xs font-medium text-slate-500">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                            CH1: 5V
+                        </div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                            CH2: OFF
+                        </div>
+</div>
+</div>
+<!-- Graph Area -->
+<div class="flex-1 relative overflow-hidden bg-white m-1 rounded-lg border border-slate-100 oscilloscope-grid oscilloscope-grid-major group">
+<!-- Labels Y Axis -->
+<div class="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between py-2 text-[10px] text-slate-400 font-mono items-center pointer-events-none select-none z-10 bg-white/50 backdrop-blur-sm">
+<span>5V</span>
+<span>4V</span>
+<span>3V</span>
+<span>2V</span>
+<span>1V</span>
+<span>0V</span>
+</div>
+<!-- Labels X Axis -->
+<div class="absolute left-8 right-0 bottom-0 h-6 flex justify-between px-2 text-[10px] text-slate-400 font-mono items-center pointer-events-none select-none z-10 bg-white/50 backdrop-blur-sm">
+<span>0ms</span>
+<span>100ms</span>
+<span>200ms</span>
+<span>300ms</span>
+<span>400ms</span>
+<span>500ms</span>
+</div>
+<!-- Simulated Signal SVG -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none pl-8 pb-6" preserveaspectratio="none" viewbox="0 0 500 100">
+<defs>
+<lineargradient id="signalGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#135bec" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#135bec" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Main Path -->
+<path d="M0,90 Q20,90 25,60 T50,20 T75,60 T100,90 T150,90 T175,60 T200,20 T225,60 T250,90 T300,90 T325,60 T350,20 T375,60 T400,90 T450,90 T475,60 T500,20" fill="url(#signalGradient)" stroke="#135bec" stroke-linejoin="round" stroke-width="2"></path>
+<!-- Cursor Line (Simulated) -->
+<line class="opacity-50" stroke="#ef4444" stroke-dasharray="4 2" stroke-width="1" x1="400" x2="400" y1="0" y2="100"></line>
+</svg>
+<!-- Live Value Floating Badge -->
+<div class="absolute top-4 right-4 bg-slate-900/90 text-white px-3 py-1.5 rounded font-mono text-sm shadow-lg backdrop-blur flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                        3.24 V
+                    </div>
+</div>
+<!-- Scope Controls -->
+<div class="p-4 bg-slate-50 border-t border-slate-200 rounded-b-xl flex flex-wrap gap-6 items-end">
+<!-- Control Group: Timebase -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Base de Tiempo</label>
+<div class="flex items-center gap-2 bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600">
+<span class="material-symbols-outlined text-lg">remove</span>
+</button>
+<span class="w-16 text-center text-sm font-mono font-medium text-slate-700">100ms</span>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600">
+<span class="material-symbols-outlined text-lg">add</span>
+</button>
+</div>
+</div>
+<!-- Control Group: Amplitude -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Amplitud (V/Div)</label>
+<div class="flex items-center gap-2 bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600">
+<span class="material-symbols-outlined text-lg">remove</span>
+</button>
+<span class="w-16 text-center text-sm font-mono font-medium text-slate-700">1V</span>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600">
+<span class="material-symbols-outlined text-lg">add</span>
+</button>
+</div>
+</div>
+<!-- Control Group: Trigger -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Disparador</label>
+<div class="flex items-center gap-2">
+<label class="inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="relative w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+<span class="ms-2 text-sm font-medium text-slate-600">Auto</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Action Bar -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<button class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm shadow-primary/30 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                        Ejecutar
+                    </button>
+<button class="bg-white border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[20px]">stop</span>
+                        Detener
+                    </button>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto">
+<div class="hidden md:block h-8 w-px bg-slate-200"></div>
+<button class="flex-1 md:flex-none bg-white border border-primary text-primary hover:bg-primary-light px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[20px]">file_download</span>
+                        Exportar .ino
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>
