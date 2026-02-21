@@ -40,3 +40,22 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Stitch/Make — exports de prototipo de diseño (no son código fuente)
+stitch_s_ptima_main_dashboard/
+stitch_*/
+
+# Documentos de ideación y planificación en la raíz (van en DOCS-BIN-SEPT o Notion)
+ATTRIBUTIONS.md
+BIOHERMANO.md
+Bio-Programa.md
+"MEJORAR BINARY.md"
+"MEJORAR Binary v2.md"
+NOMBRE.md
+PROMPT_STITCH.md
+PROYECTO_BIOMEDICO_FUNDACIONAL.md
+SEPTIMA_REPO_RESUMEN.md
+"idea BioTech.md"
+
+# Guías de contexto/prompt (no son parte del código desplegable)
+guidelines/
