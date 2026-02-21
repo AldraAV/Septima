@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { ECGChart } from './ECGChart';
-import heartImg from 'figma:asset/ba3373db19c2dfa1aac8a3df4d1c4e9b61e0b80a.png';
+import { HeartSVG } from './HeartSVG';
 import { useWindkessel } from '../../hooks/useBinaryEngine';
 import type { WindkesselSimulationRequest } from '../../services/binaryTypes';
 
@@ -120,14 +120,11 @@ function AnatomyTab() {
             filter: 'blur(30px)', bottom: '15%', left: '50%', transform: 'translateX(-50%)'
           }} />
           <div style={{ position: 'relative', transform: `scale(${zoom})`, transition: dragging ? 'none' : 'transform 0.3s' }}>
-            <img
-              src={heartImg}
-              alt="Corazón 3D"
+            <HeartSVG
+              width={380}
+              height={380}
               draggable={false}
               style={{
-                width: 380,
-                height: 380,
-                objectFit: 'contain',
                 transform: `rotateY(${rotation}deg)`,
                 transition: dragging ? 'none' : 'transform 0.1s',
                 filter: 'drop-shadow(0 0 40px rgba(255,46,99,0.25))',
