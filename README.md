@@ -1,7 +1,6 @@
-
-  # Prototipo interactivo Séptima
-
-  This is a code bundle for Prototipo interactivo Séptima. The original project is available at https://www.figma.com/design/6pWB2ZG2pdTJWhoWtogolY/Prototipo-interactivo-S%C3%A9ptima.
+  # Séptima: Plataforma de Simulación Biomédica 🧬🩸
+  
+  Plataforma avanzada para la simulación dinámica de sistemas fisiológicos y hematológicos, potenciada por el motor EquaCore C++.
 
   ## Running the code
 

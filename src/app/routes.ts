@@ -6,6 +6,7 @@ import { MicrocontrollerPage } from './components/MicrocontrollerPage';
 import { GlucoseModule } from './components/GlucoseModule';
 import { NeuralModule } from './components/NeuralModule';
 import { PharmaModule } from './components/PharmaModule';
+import { PTISimulator } from './components/PTISimulator';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
       { path: 'glucosa', Component: GlucoseModule },
       { path: 'neuronal', Component: NeuralModule },
       { path: 'farmaco', Component: PharmaModule },
+      { path: 'pti', Component: PTISimulator },
       { path: 'microcontrolador', Component: MicrocontrollerPage },
       { path: '*', Component: Dashboard },
     ],

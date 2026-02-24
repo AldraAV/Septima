@@ -106,6 +106,9 @@ function Sidebar({ safeMode, setSafeMode, onStartTour }: {
           )}
         </div>
 
+        <NavLink to="/pti" className={({ isActive }) => linkCls(isActive)}>
+          <Activity size={15} /><span>Hematología (PTI)</span>
+        </NavLink>
         <NavLink to="/microcontrolador" className={({ isActive }) => linkCls(isActive)}>
           <Cpu size={15} /><span>Microcontrolador</span>
         </NavLink>
