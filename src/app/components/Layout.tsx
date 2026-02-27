@@ -63,10 +63,11 @@ function Sidebar({ safeMode, setSafeMode, onStartTour }: {
       <div className="px-4 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{
-            background: 'linear-gradient(135deg, #FF2E63, #ff6b8a)',
-            boxShadow: '0 0 24px rgba(255,46,99,0.45)',
+            background: 'rgba(255, 46, 99, 0.15)',
+            border: '1px solid rgba(255, 46, 99, 0.3)',
+            boxShadow: '0 0 24px rgba(255,46,99,0.25)',
           }}>
-            <Heart size={18} className="text-white fill-white" />
+            <img src="/assets/logoSeptima.svg" alt="Séptima Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,46,99,0.8)]" />
           </div>
           <div>
             <div className="text-[#F9FAFB] font-bold text-base" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.3px' }}>Séptima</div>
@@ -275,12 +276,7 @@ export function Layout() {
                     <Shield size={10} />MODO SEGURO
                   </div>
                 )}
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#00EAD3' }} />
-                  <span className="text-[#94A3B8] text-xs" style={{ fontFamily: 'JetBrains Mono, monospace' }}>EN VIVO</span>
-                </div>
-                <button className="p-1.5 text-[#94A3B8] hover:text-[#F9FAFB] transition-colors"><Bell size={14} /></button>
-                <button className="p-1.5 text-[#94A3B8] hover:text-[#F9FAFB] transition-colors"><Settings size={14} /></button>
+                {/* Removed Mocks */}
               </div>
             </header>
             <main className="flex-1 overflow-y-auto">

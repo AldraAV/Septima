@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * binaryApiService.ts — Capa de comunicación Séptima ↔ Binary EquaLab API
  *
@@ -23,7 +24,7 @@ import { BinaryApiError } from './binaryTypes';
 const BINARY_BASE_URL =
   import.meta.env.VITE_BINARY_API_URL ?? 'http://localhost:8000';
 
-const DEFAULT_TIMEOUT_MS = 5000;
+const DEFAULT_TIMEOUT_MS = 25000;
 
 // ─── Fetch con timeout ──────────────────────────────────────────────────────────
 
@@ -125,9 +126,25 @@ export async function simulateWindkessel(
   );
 }
 
+// ─── PTI (Púrpura Trombocitopénica Inmune) ──────────────────────────────────────
+
+export async function simulatePTI(
+  req: { t_start: number; t_end: number; dt: number; y0: number[]; params: any; mode?: string }
+): Promise<any> {
+  return fetchWithTimeout<any>(
+    `${BINARY_BASE_URL}/api/septima/bio/pti`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    }
+  );
+}
+
 export default {
   checkEngineStatus,
   simulateODE,
   simulateGlucose,
   simulateWindkessel,
+  simulatePTI,
 };

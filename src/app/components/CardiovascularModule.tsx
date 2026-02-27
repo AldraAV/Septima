@@ -9,6 +9,7 @@ import { ECGChart } from './ECGChart';
 import { HeartSVG } from './HeartSVG';
 import { useWindkessel } from '../../hooks/useBinaryEngine';
 import type { WindkesselSimulationRequest } from '../../services/binaryTypes';
+import { useOrganicAnimation } from '../../hooks/useOrganicAnimation';
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const GLASS = {
@@ -56,7 +57,7 @@ const LAYERS = [
   { id: 'conduccion', label: 'Sist. Conducción', color: '#f59e0b' },
 ];
 
-function AnatomyTab() {
+function AnatomyTab({ bpm }: { bpm: number }) {
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
@@ -65,6 +66,7 @@ function AnatomyTab() {
   const [activeLayers, setActiveLayers] = useState(['musculo', 'arterias']);
   const [activeLabel, setActiveLabel] = useState<string | null>('vi');
   const heartRef = useRef<HTMLDivElement>(null);
+  const beatRef = useOrganicAnimation({ type: 'heartbeat', duration: 60000 / bpm, loop: true }) as React.RefObject<HTMLDivElement>;
 
   const handleMouseDown = (e: React.MouseEvent) => { setDragging(true); setLastX(e.clientX); };
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -120,17 +122,34 @@ function AnatomyTab() {
             filter: 'blur(30px)', bottom: '15%', left: '50%', transform: 'translateX(-50%)'
           }} />
           <div style={{ position: 'relative', transform: `scale(${zoom})`, transition: dragging ? 'none' : 'transform 0.3s' }}>
-            <HeartSVG
-              width={380}
-              height={380}
-              draggable={false}
-              style={{
-                transform: `rotateY(${rotation}deg)`,
-                transition: dragging ? 'none' : 'transform 0.1s',
-                filter: 'drop-shadow(0 0 40px rgba(255,46,99,0.25))',
-                animation: dragging ? 'none' : 'heartFloat 4s ease-in-out infinite',
-              }}
-            />
+            <div ref={beatRef} style={{ position: 'relative', width: 380, height: 380 }}>
+              {/* Capa Fotorrealista (Fondo Híbrido) */}
+              <img 
+                src="/assets/septima-heart.png" 
+                alt="Corazón 3D" 
+                className="absolute inset-0 w-full h-full object-contain mix-blend-screen opacity-95"
+                style={{ 
+                  transform: `rotateY(${rotation}deg)`,
+                  transition: dragging ? 'none' : 'transform 0.1s',
+                  pointerEvents: 'none',
+                  filter: 'contrast(1.6) brightness(0.6) saturate(1.15) drop-shadow(0 0 10px rgba(0,0,0,1))'
+                }} 
+              />
+              {/* Capa Vectorial Lógica (SVG Invisible / Sistema Eléctrico CSS) */}
+              <HeartSVG
+                width={380}
+                height={380}
+                draggable={false}
+                activeLayers={activeLayers}
+                className="absolute inset-0 w-full h-full"
+                style={{
+                  transform: `rotateY(${rotation}deg)`,
+                  transition: dragging ? 'none' : 'transform 0.1s',
+                  filter: 'drop-shadow(0 0 40px rgba(255,46,99,0.15))',
+                  animation: dragging ? 'none' : 'heartFloat 4s ease-in-out infinite',
+                }}
+              />
+            </div>
             {/* Anatomical Labels */}
             {LABELS.map(label => (
               <div
@@ -702,7 +721,7 @@ export function CardiovascularModule() {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 'anatomia' && <AnatomyTab />}
+        {activeTab === 'anatomia' && <AnatomyTab bpm={bpm} />}
         {activeTab === 'fisiologia' && (
           <PhysiologyTab
             bpm={bpm} setBpm={setBpm}

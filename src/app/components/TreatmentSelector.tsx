@@ -15,8 +15,8 @@ const TreatmentSelector: React.FC<TreatmentSelectorProps> = ({ activeTreatment, 
     ];
 
     return (
-        <div className="bg-background-dark/50 border border-aurora-border rounded-3xl p-6">
-            <h3 className="text-sm font-bold text-aurora-muted uppercase tracking-widest mb-4">ProtocoloMédico</h3>
+        <div className="rounded-3xl p-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
+            <h3 className="text-sm font-bold text-[#94A3B8] uppercase tracking-widest mb-4">ProtocoloMédico</h3>
             <div className="grid grid-cols-1 gap-3">
                 {treatments.map((t) => {
                     const Icon = t.icon;
@@ -28,8 +28,8 @@ const TreatmentSelector: React.FC<TreatmentSelectorProps> = ({ activeTreatment, 
                             onClick={() => setTreatment(t.id)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all border text-left
                                 ${isActive 
-                                    ? `bg-primary/10 border-primary/40 text-primary` 
-                                    : 'bg-white/5 border-aurora-border/20 text-aurora-secondary hover:bg-white/10'
+                                    ? `bg-[#00EAD3]/10 border-[#00EAD3]/40 text-[#00EAD3]` 
+                                    : 'bg-white/5 border-white/10 text-[#94A3B8] hover:bg-white/10'
                                 }
                             `}
                         >

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router';
 import { Heart, Activity, Zap, Microscope, ArrowRight, Clock, BookOpen, Award, Droplets, Brain, Pill } from 'lucide-react';
 import { useTour } from './Layout';
+import { useOrganicAnimation } from '../../hooks/useOrganicAnimation';
 
 const GLASS = {
   background: 'rgba(255,255,255,0.03)',
@@ -11,9 +12,11 @@ const GLASS = {
 
 const GLASS_HOVER = 'hover:border-[rgba(0,234,211,0.25)] hover:bg-[rgba(0,234,211,0.04)] transition-all duration-300 cursor-pointer';
 
-function StatCard({ label, value, unit, color, icon: Icon }: { label: string; value: string; unit: string; color: string; icon: React.ElementType }) {
+function StatCard({ label, value, unit, color, icon: Icon, delay = 0 }: { label: string; value: string; unit: string; color: string; icon: React.ElementType; delay?: number }) {
+  const animRef = useOrganicAnimation({ type: 'liquid-appear', delay });
+
   return (
-    <div className="rounded-2xl p-5 flex-1" style={GLASS}>
+    <div ref={animRef} className="rounded-2xl p-5 flex-1 opacity-0" style={GLASS}>
       <div className="flex items-start justify-between mb-3">
         <div className="text-[#94A3B8] text-xs uppercase tracking-wider">{label}</div>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${color}18`, border: `1px solid ${color}30` }}>
@@ -28,9 +31,11 @@ function StatCard({ label, value, unit, color, icon: Icon }: { label: string; va
   );
 }
 
-function ModuleCard({ tab, title, desc, icon: Icon, color, status, progress, onClick }: any) {
+function ModuleCard({ tab, title, desc, icon: Icon, color, status, progress, onClick, delay = 0 }: any) {
+  const animRef = useOrganicAnimation({ type: 'liquid-appear', delay });
+
   return (
-    <div onClick={onClick} className={`rounded-2xl p-5 flex flex-col group ${GLASS_HOVER}`} style={GLASS}>
+    <div ref={animRef} onClick={onClick} className={`rounded-2xl p-5 flex flex-col group ${GLASS_HOVER} opacity-0`} style={GLASS}>
       <div className="flex items-start justify-between mb-4">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{
           background: `${color}15`,
@@ -83,14 +88,8 @@ export function Dashboard() {
         <p className="text-[#94A3B8] text-lg">Sistema Cardiovascular · Módulo 1 en progreso</p>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <StatCard label="Frecuencia Cardíaca" value="72" unit="bpm" color="#FF2E63" icon={Heart} />
-        <StatCard label="Presión Arterial" value="120/80" unit="mmHg" color="#00EAD3" icon={Activity} />
-        <StatCard label="Sesiones de Lab" value="12" unit="sesiones" color="#7c6ef8" icon={BookOpen} />
-        <StatCard label="Logros Desbloqueados" value="5" unit="badges" color="#f59e0b" icon={Award} />
-      </div>
-
+      {/* Stats Row REMOVED (No mock data) */}
+      
       {/* Module Cards */}
       <div className="mb-6">
         <h2 className="text-[#F9FAFB] font-semibold text-lg mb-4">Acceso Rápido</h2>
@@ -122,43 +121,8 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Progress + Quick Actions */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Overall Progress */}
-        <div className="col-span-2 rounded-2xl p-5" style={GLASS}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="text-[#F9FAFB] font-semibold text-base">Progreso General del Curso</div>
-              <div className="text-[#94A3B8] text-sm">Módulo Cardiovascular · 3 unidades</div>
-            </div>
-            <div className="text-3xl font-bold" style={{ color: '#00EAD3', fontFamily: 'JetBrains Mono' }}>80%</div>
-          </div>
-          <div className="h-2.5 rounded-full mb-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <div className="h-full rounded-full" style={{
-              width: '80%',
-              background: 'linear-gradient(90deg, #00EAD3, #7be3ff)',
-              boxShadow: '0 0 12px rgba(0,234,211,0.4)',
-            }} />
-          </div>
-          <div className="flex justify-between text-xs text-[#94A3B8]">
-            <span>Inicio</span><span>Meta Final</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3 mt-4">
-            {[
-              { label: 'Anatomía 3D', val: 65, done: false },
-              { label: 'Fisiología', val: 40, done: false },
-              { label: 'Monitor ECG', val: 55, done: false },
-            ].map(m => (
-              <div key={m.label} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="text-[#94A3B8] text-xs mb-2">{m.label}</div>
-                <div className="h-1 rounded-full mb-1" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <div className="h-full rounded-full" style={{ width: `${m.val}%`, background: '#00EAD3' }} />
-                </div>
-                <div className="text-[#F9FAFB] text-xs font-medium" style={{ fontFamily: 'JetBrains Mono' }}>{m.val}%</div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {/* Quick Actions */}
         <div className="rounded-2xl p-5 flex flex-col" style={GLASS}>

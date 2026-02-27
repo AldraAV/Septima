@@ -51,11 +51,13 @@ export function Sidebar({
     >
       {/* Logo */}
       <div className="p-5 border-b border-white/8 flex items-center gap-3">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: 'linear-gradient(135deg, #FF2E63, #c0194f)' }}
-        >
-          <Heart size={18} fill="white" className="text-white" />
+        <div className="relative group shrink-0">
+          <div className="absolute inset-0 bg-[#00EAD3]/20 rounded-xl blur-md group-hover:bg-[#00EAD3]/40 transition-colors"></div>
+          <img 
+            src="/assets/septima-logo.png" 
+            alt="Séptima Logo" 
+            className="w-10 h-10 object-contain relative z-10"
+          />
         </div>
         <div>
           <span
@@ -116,104 +118,26 @@ export function Sidebar({
             className="text-[10px] uppercase tracking-widest text-[#94A3B8]/60 px-3 py-2"
             style={{ fontFamily: 'JetBrains Mono, monospace' }}
           >
-            Herramientas
+            Soporte Académico
           </p>
 
           <button
             onClick={onStartTour}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#94A3B8] hover:text-[#F9FAFB] hover:bg-white/5 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#94A3B8] hover:text-[#00EAD3] hover:bg-white/5 transition-all"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             <BookOpen size={16} />
-            <span>Recorrido Guiado</span>
+            <span>Documentación Engine</span>
           </button>
         </div>
       </nav>
 
-      {/* Safe Lab Mode */}
-      <div className="p-3 border-t border-white/8 space-y-2">
-        {/* Safe Lab Toggle */}
-        <div
-          className={`rounded-xl p-3 transition-all duration-300 ${
-            safeLabMode
-              ? 'bg-[#00EAD3]/10 border border-[#00EAD3]/40'
-              : 'bg-white/5 border border-white/10'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Shield
-                size={14}
-                className={safeLabMode ? 'text-[#00EAD3]' : 'text-[#94A3B8]'}
-              />
-              <span
-                className={`text-xs ${safeLabMode ? 'text-[#00EAD3]' : 'text-[#94A3B8]'}`}
-                style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}
-              >
-                Modo Lab Seguro
-              </span>
-            </div>
-            <button
-              onClick={onToggleSafeLab}
-              className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
-                safeLabMode ? 'bg-[#00EAD3]' : 'bg-white/20'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                  safeLabMode ? 'left-5' : 'left-0.5'
-                }`}
-              />
-            </button>
-          </div>
-          {safeLabMode && (
-            <p
-              className="text-[10px] text-[#00EAD3]/80"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              Experimenta libremente ✓
-            </p>
-          )}
-        </div>
-
-        {/* Restore all button */}
-        <button
-          onClick={onRestoreAll}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-[#FF2E63] border border-[#FF2E63]/30 hover:bg-[#FF2E63]/10 transition-all"
-          style={{ fontFamily: 'Inter, sans-serif' }}
-        >
-          <RotateCcw size={12} />
-          Restaurar Todo
-        </button>
-
-        {/* User */}
-        <div className="flex items-center gap-2 px-2 pt-1">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 700,
-              color: 'white'
-            }}
-          >
-            JM
-          </div>
-          <div className="min-w-0">
-            <p
-              className="text-xs text-[#F9FAFB] truncate"
-              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}
-            >
-              José M.
-            </p>
-            <p
-              className="text-[10px] text-[#94A3B8] truncate"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              Estudiante
-            </p>
-          </div>
-        </div>
+      {/* Footer minimalista */}
+      <div className="p-4 border-t border-white/8 space-y-2">
+        <label className="text-xs text-[#94A3B8] flex items-center gap-2">
+          <Activity size={12} className="text-[#00EAD3]"/>
+          Engine C++ Activo
+        </label>
       </div>
     </aside>
   );

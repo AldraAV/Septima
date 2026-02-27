@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+import binaryApiService from '../../services/binaryApiService';
 import svgPaths from "./svg-kgc9oey64v";
 
 function BackgroundBorder() {
@@ -22,10 +24,26 @@ function Heading1() {
 }
 
 function Container1() {
+  const { data, isPending } = useQuery({
+    queryKey: ['engineStatus'],
+    queryFn: () => binaryApiService.checkEngineStatus(),
+    refetchInterval: 10000 // Ping every 10s
+  });
+
   return (
     <div className="absolute content-stretch flex flex-col items-center left-0 right-0 top-[98px]" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[28px] justify-center leading-[0] relative shrink-0 text-[#64748b] text-[18px] text-center w-[311.72px]">
-        <p className="leading-[28px] whitespace-pre-wrap">Sistema Cardiovascular en desarrollo</p>
+      <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[28px] justify-center leading-[0] relative shrink-0 text-[18px] text-center w-[400px]">
+        {isPending ? (
+          <p className="leading-[28px] whitespace-pre-wrap text-[#64748b] animate-pulse">Conectando a Binary EquaLab...</p>
+        ) : data?.status === 'ok' ? (
+          <p className="leading-[28px] whitespace-pre-wrap text-[#00EAD3]">
+            ● Binary EquaLab {data.version} Online
+          </p>
+        ) : (
+          <p className="leading-[28px] whitespace-pre-wrap text-[#FF2E63]">
+            ○ Binary Engine Fuera de Línea
+          </p>
+        )}
       </div>
     </div>
   );
@@ -700,8 +718,8 @@ function Container31() {
 
 function Overlay() {
   return (
-    <div className="bg-[rgba(19,91,236,0.1)] content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[40px]" data-name="Overlay">
-      <Container31 />
+    <div className="bg-aurora-secondary/10 border border-aurora-secondary/20 content-stretch flex items-center justify-center relative rounded-xl shrink-0 size-[42px] overflow-hidden group shadow-[0_0_15px_rgba(255,46,99,0.15)] transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,46,99,0.3)]" data-name="Overlay">
+      <img src="/assets/septima-logo.png" className="w-[28px] h-[28px] object-contain group-hover:scale-110 transition-transform duration-300" alt="Séptima Icon" />
     </div>
   );
 }

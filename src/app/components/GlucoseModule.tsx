@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Droplets, Activity, Zap, RefreshCw, Cpu, Info } from 'lucide-react';
 import { useGlucoseInsulin } from '../../hooks/useBinaryEngine';
+import { useOrganicAnimation } from '../../hooks/useOrganicAnimation';
 import type {
   GlucoseSimulationRequest,
   GlucoseSimulationResult
@@ -144,6 +145,7 @@ export function GlucoseModule() {
   const [Ib,  setIb]  = useState(7);
   const [n,   setN]   = useState(0.142);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const breatheRef = useOrganicAnimation({ type: 'breathe' }) as React.RefObject<HTMLDivElement>;
 
   // Parámetros de simulación
   const req = useMemo<GlucoseSimulationRequest>(() => ({
@@ -296,7 +298,7 @@ export function GlucoseModule() {
           </div>
 
           {/* Gráfica de Glucosa (principal) */}
-          <div className="flex-1 rounded-2xl overflow-hidden relative" style={{ background: '#040d1e', border: '1px solid rgba(255,255,255,0.07)', minHeight: 230 }}>
+          <div ref={breatheRef} className="flex-1 rounded-2xl overflow-hidden relative" style={{ background: '#040d1e', border: '1px solid rgba(255,255,255,0.07)', minHeight: 230 }}>
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: 'rgba(4,13,30,0.6)', backdropFilter: 'blur(4px)' }}>
                 <div className="flex items-center gap-2 text-[#00EAD3] text-sm font-mono">
