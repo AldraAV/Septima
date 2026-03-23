@@ -59,3 +59,14 @@ idea\ BioTech.md
 
 # Guías de contexto/prompt (no son parte del código desplegable)
 guidelines/
+
+# Archivos Privados
+README.md
+Séptima.md
+PROMPT_STITCH
+stitch_s_ptima_main_dashboard
+
+# IDEs & Agents
+.agent/
+.idea/
+.qodo/

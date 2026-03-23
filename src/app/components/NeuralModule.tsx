@@ -17,6 +17,7 @@ import type { ODESimulationRequest } from '../../services/binaryTypes';
 import { ExportButton } from './ExportButton';
 import { QuizCard } from './QuizCard';
 import { buildExportHandlers } from '../../utils/exportUtils';
+import { ClinicalScenario } from './ClinicalScenario';
 
 // ─── Estilos ────────────────────────────────────────────────────────────────────
 const PANEL: React.CSSProperties = {
@@ -106,6 +107,12 @@ export function NeuralModule() {
   const loadPreset = useCallback((key: keyof typeof PRESETS) => {
     const p = PRESETS[key];
     setIext(p.I_ext); setGna(p.g_Na); setGk(p.g_K);
+  }, []);
+
+  const onLoadCase = useCallback((params: Record<string, any>) => {
+    if (params.I_ext !== undefined) setIext(params.I_ext);
+    if (params.g_Na !== undefined) setGna(params.g_Na);
+    if (params.g_K !== undefined) setGk(params.g_K);
   }, []);
 
   // Request biomédico
@@ -220,6 +227,14 @@ export function NeuralModule() {
               </>
             )}
           </div>
+
+          {/* Clinical Cases */}
+          <ClinicalScenario
+            module="neural"
+            accentColor="#e879f9"
+            onLoadCase={onLoadCase}
+            simulationResult={data ? { y: data.y, params: { I_ext, g_Na, g_K } } : undefined}
+          />
         </div>
 
         {/* Panel de gráficas */}

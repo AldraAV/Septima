@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Heart, Activity, Zap, Microscope, ArrowRight, Clock, BookOpen, Award, Droplets, Brain, Pill } from 'lucide-react';
+import { Heart, Activity, Zap, Microscope, ArrowRight, Clock, BookOpen, Award, Droplets, Brain, Pill, Syringe, Cpu, Stethoscope, BarChart3 } from 'lucide-react';
 import { useTour } from './Layout';
 import { useOrganicAnimation } from '../../hooks/useOrganicAnimation';
+import { ECGChart } from './ECGChart';
+
+const API_BASE = (import.meta as any).env?.VITE_BINARY_API_URL || 'http://localhost:8000';
 
 const GLASS = {
   background: 'rgba(255,255,255,0.03)',
@@ -72,52 +75,94 @@ function ModuleCard({ tab, title, desc, icon: Icon, color, status, progress, onC
 export function Dashboard() {
   const navigate = useNavigate();
   const { startTour } = useTour();
+  const [ecgTime, setEcgTime] = useState(0);
+  const [backendStatus, setBackendStatus] = useState<'online' | 'offline' | 'checking'>('checking');
+  const [clinicalCasesCount, setClinicalCasesCount] = useState(0);
+
+  // Animate ECG mini-graph
+  useEffect(() => {
+    const interval = setInterval(() => setEcgTime(t => t + 0.016), 16);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Check backend health + fetch dynamic data
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const [healthRes, casesRes] = await Promise.all([
+          fetch(`${API_BASE}/api/septima/explain/pti`).then(r => r.ok),
+          fetch(`${API_BASE}/api/septima/cases/pti`).then(r => r.json()).catch(() => ({ total: 0 })),
+        ]);
+        setBackendStatus(healthRes ? 'online' : 'offline');
+        setClinicalCasesCount(casesRes.total || 0);
+      } catch {
+        setBackendStatus('offline');
+      }
+    };
+    check();
+  }, []);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      {/* Welcome Header */}
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-4"
-          style={{ background: 'rgba(0,234,211,0.08)', border: '1px solid rgba(0,234,211,0.2)', color: '#00EAD3', fontFamily: 'JetBrains Mono' }}>
-          <div className="w-1.5 h-1.5 rounded-full bg-[#00EAD3] animate-pulse" />
-          SIMULACIÓN ACTIVA · CARDIOVASCULAR
+      {/* Welcome Header with mini-ECG */}
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-4"
+            style={{ background: 'rgba(0,234,211,0.08)', border: '1px solid rgba(0,234,211,0.2)', color: '#00EAD3', fontFamily: 'JetBrains Mono' }}>
+            <div className={`w-1.5 h-1.5 rounded-full ${backendStatus === 'online' ? 'bg-[#00EAD3] animate-pulse' : backendStatus === 'offline' ? 'bg-[#FF2E63]' : 'bg-[#FBBF24] animate-pulse'}`} />
+            {backendStatus === 'online' ? 'MOTOR BIO-ENGINE · ONLINE' : backendStatus === 'offline' ? 'MOTOR OFFLINE' : 'CONECTANDO...'}
+          </div>
+          <h1 className="text-4xl font-bold text-[#F9FAFB] mb-2" style={{ letterSpacing: '-0.8px' }}>
+            Séptima <span style={{ background: 'linear-gradient(90deg, #00EAD3, #7be3ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Biomédica</span>
+          </h1>
+          <p className="text-[#94A3B8] text-lg">Simulación biomédica educativa con motor C++ en tiempo real</p>
         </div>
-        <h1 className="text-4xl font-bold text-[#F9FAFB] mb-2" style={{ letterSpacing: '-0.8px' }}>
-          Bienvenido, <span style={{ background: 'linear-gradient(90deg, #00EAD3, #7be3ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>José</span>
-        </h1>
-        <p className="text-[#94A3B8] text-lg">Sistema Cardiovascular · Módulo 1 en progreso</p>
+        {/* Mini ECG */}
+        <div className="w-48 h-16 flex-shrink-0 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,234,211,0.1)' }}>
+          <ECGChart bpm={72} time={ecgTime} noiseLevel={0.01} height={64} />
+        </div>
       </div>
 
-      {/* Stats Row REMOVED (No mock data) */}
+      {/* Dynamic Stats Row */}
+      <div className="flex gap-4 mb-8">
+        <StatCard label="Modelos ODE" value="5" unit="activos" color="#00EAD3" icon={BarChart3} delay={0} />
+        <StatCard label="Casos Clínicos" value={String(clinicalCasesCount)} unit="PTI" color="#FF2E63" icon={Stethoscope} delay={50} />
+        <StatCard label="Motor" value={backendStatus === 'online' ? 'ON' : 'OFF'} unit={backendStatus === 'online' ? 'Python' : ''} color={backendStatus === 'online' ? '#00EAD3' : '#FF2E63'} icon={Cpu} delay={100} />
+        <StatCard label="Endpoints API" value="13" unit="activos" color="#FBBF24" icon={Zap} delay={150} />
+      </div>
       
       {/* Module Cards */}
       <div className="mb-6">
         <h2 className="text-[#F9FAFB] font-semibold text-lg mb-4">Acceso Rápido</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <ModuleCard tab="anatomia" title="Anatomía 3D"
+        <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+          <ModuleCard tab="pti" title="PTI · Séptima"
+            desc="Púrpura Trombocitopénica: simulación dinámica con IA multi-agente y WebSockets 60 FPS."
+            icon={Syringe} color="#FF2E63" status="active" progress={90}
+            onClick={() => navigate('/pti')} delay={0} />
+          <ModuleCard tab="anatomia" title="Anatomía Cardíaca"
             desc="Explora el corazón humano en 3D. Capas, rotación y etiquetas anatómicas interactivas."
-            icon={Microscope} color="#00EAD3" status="active" progress={65}
-            onClick={() => navigate('/cardiovascular?tab=anatomia')} />
+            icon={Microscope} color="#00EAD3" status="active" progress={75}
+            onClick={() => navigate('/cardiovascular?tab=anatomia')} delay={50} />
           <ModuleCard tab="fisiologia" title="Fisiología Windkessel"
             desc="Simula el ciclo cardíaco. Presión aórtica en tiempo real con datos del Bio-Engine."
-            icon={Activity} color="#7c6ef8" status="active" progress={40}
-            onClick={() => navigate('/cardiovascular?tab=fisiologia')} />
+            icon={Activity} color="#7c6ef8" status="active" progress={60}
+            onClick={() => navigate('/cardiovascular?tab=fisiologia')} delay={100} />
           <ModuleCard tab="ecg" title="Monitor ECG"
             desc="ECG en tiempo real. Análisis de segmentos P-QRS-T con filtros de señal digital."
             icon={Zap} color="#FF2E63" status="active" progress={55}
-            onClick={() => navigate('/cardiovascular?tab=ecg')} />
+            onClick={() => navigate('/cardiovascular?tab=ecg')} delay={150} />
           <ModuleCard tab="glucosa" title="Glucosa-Insulina"
             desc="Modelo de Bergman: simula IVGTT, Diabetes Tipo 2 y respuesta post-ejercicio."
-            icon={Droplets} color="#f59e0b" status="active" progress={30}
-            onClick={() => navigate('/glucosa')} />
+            icon={Droplets} color="#f59e0b" status="active" progress={50}
+            onClick={() => navigate('/glucosa')} delay={200} />
           <ModuleCard tab="neuronal" title="Neuronal HH"
             desc="Hodgkin-Huxley: potencial de acción, canales iónicos Na⁺/K⁺ y bloqueos anestésicos."
-            icon={Brain} color="#e879f9" status="active" progress={20}
-            onClick={() => navigate('/neuronal')} />
+            icon={Brain} color="#e879f9" status="active" progress={45}
+            onClick={() => navigate('/neuronal')} delay={250} />
           <ModuleCard tab="farmaco" title="Farmacocinética"
             desc="PK 1-compartimento: amoxicilina, ibuprofeno, digoxina. MIC y niveles tóxicos."
-            icon={Pill} color="#34d399" status="active" progress={15}
-            onClick={() => navigate('/farmaco')} />
+            icon={Pill} color="#34d399" status="active" progress={40}
+            onClick={() => navigate('/farmaco')} delay={300} />
         </div>
       </div>
 

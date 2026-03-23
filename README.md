@@ -15,8 +15,6 @@ Plataforma de simulación interactiva para estudiantes de Ingeniería Biomédica
 
 **El objetivo:** Que entiendas el cuerpo humano a través de las ecuaciones que lo gobiernan.
 
-> **⚠️ AVISO IMPORTANTE (DISCLAIMER MÉDICO)**: Séptima Bio-Engine es una herramienta de uso estrictamente **educativo** y de experimentación teórica biomédica. Los simuladores presentados (Cardiovascular, Farmacocinético, Hematológico, Neuronal) modelan fenomenología matemática aproximada mediante el motor C++ (EquaCore) y exponen razonamientos guiados por Inteligencia Artificial (Llama 3/Groq). **Este software NO ESTÁ CERTIFICADO por la FDA, EMA o ninguna entidad sanitaria internacional. Las simulaciones y los diálogos de los Agentes IA ("Cardiólogos", "Hematólogos", etc.) NO SUSTITUYEN el juicio de un profesional de la salud con licencia y NUNCA deben utilizarse para diagnóstico, dosificación de fármacos o toma de decisiones clínicas en la vida real.**
-
 ---
 
 ## 📦 Características Actuales

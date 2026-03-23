@@ -10,6 +10,7 @@ import { HeartSVG } from './HeartSVG';
 import { useWindkessel } from '../../hooks/useBinaryEngine';
 import type { WindkesselSimulationRequest } from '../../services/binaryTypes';
 import { useOrganicAnimation } from '../../hooks/useOrganicAnimation';
+import { ClinicalScenario } from './ClinicalScenario';
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const GLASS = {
@@ -380,6 +381,18 @@ function PhysiologyTab({ bpm, setBpm, resistance, setResistance, compliance, set
             ))}
           </div>
         </div>
+
+          {/* Clinical Cases */}
+          <ClinicalScenario
+            module="cardiovascular"
+            accentColor="#7c6ef8"
+            onLoadCase={(params) => {
+              if (params.bpm !== undefined) setBpm(params.bpm);
+              if (params.resistance !== undefined) setResistance(params.resistance);
+              if (params.compliance !== undefined) setCompliance(params.compliance);
+            }}
+            simulationResult={{ y: [], params: { bpm, resistance, compliance } }}
+          />
       </div>
 
       {/* Right: Chart */}

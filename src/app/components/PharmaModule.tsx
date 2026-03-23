@@ -17,6 +17,7 @@ import type { ODESimulationRequest } from '../../services/binaryTypes';
 import { ExportButton } from './ExportButton';
 import { QuizCard } from './QuizCard';
 import { buildExportHandlers } from '../../utils/exportUtils';
+import { ClinicalScenario } from './ClinicalScenario';
 
 // ─── Presets de fármacos reales ─────────────────────────────────────────────────
 const DRUGS = {
@@ -128,6 +129,17 @@ export function PharmaModule() {
     setReg('multiple');
   }, []);
 
+  const onLoadCase = useCallback((params: Record<string, any>) => {
+    if (params.dose !== undefined) setDose(params.dose);
+    if (params.ka !== undefined) setKa(params.ka);
+    if (params.ke !== undefined) setKe(params.ke);
+    if (params.Vd !== undefined) setVd(params.Vd);
+    if (params.F !== undefined) setF_(params.F);
+    if (params.t_end !== undefined) setTend(params.t_end);
+    if (params.interval !== undefined) setInt(params.interval);
+    if (params.n !== undefined) setNd(params.n);
+  }, []);
+
   // Request al backend
   const req = useMemo<ODESimulationRequest>(() => ({
     model: 'compartment_pk',
@@ -151,8 +163,16 @@ export function PharmaModule() {
 
   // Estadísticas
   const Cmax   = data ? Math.max(...data.y[1].map(v => v ?? 0)).toFixed(3) : '—';
+  const CmaxIdx = data ? data.y[1].indexOf(Math.max(...data.y[1].map(v => v ?? 0))) : 0;
+  const Tmax   = data && CmaxIdx >= 0 ? data.t[CmaxIdx]?.toFixed(1) ?? '—' : '—';
   const Cmin   = data ? Math.min(...data.y[1].filter((v, i) => i > 10 && (v ?? 0) > 0)).toFixed(3) : '—';
   const halfLife = (0.693 / ke).toFixed(1);
+  // AUC (trapezoidal rule)
+  const aucPK  = data ? data.t.reduce((acc, t, i) => {
+    if (i === 0) return 0;
+    const dt_step = data.t[i] - data.t[i - 1];
+    return acc + ((data.y[1][i] + data.y[1][i - 1]) / 2) * dt_step;
+  }, 0) : 0;
   const aboveThreshold = chartData.filter(d => d.C >= drug.threshold).length;
   const coverage = chartData.length > 0 ? Math.round((aboveThreshold / chartData.length) * 100) : 0;
 
@@ -241,17 +261,27 @@ export function PharmaModule() {
               </>
             )}
           </div>
+
+          {/* Clinical Cases */}
+          <ClinicalScenario
+            module="pharma"
+            accentColor={drug.color}
+            onLoadCase={onLoadCase}
+            simulationResult={data ? { y: data.y[1]?.map(v => [v]) || [], params: { dose, ka, ke, Vd, F, interval, n: nDoses } } : undefined}
+          />
         </div>
 
         {/* Panel de gráficas */}
         <div className="flex-1 flex flex-col gap-3 overflow-hidden">
 
           {/* KPIs */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 xl:grid-cols-6 gap-2">
             {[
               { label: 'C MÁXIMA', value: Cmax, unit: 'mg/L', color: drug.color },
+              { label: 'T MÁXIMO', value: Tmax, unit: 'h', color: '#f59e0b' },
               { label: 'C MÍNIMA', value: Cmin, unit: 'mg/L', color: '#94A3B8' },
               { label: 't½ VIDA MEDIA', value: halfLife, unit: 'h', color: '#f59e0b' },
+              { label: 'AUC₀₋ₜ', value: aucPK > 0 ? aucPK.toFixed(2) : '—', unit: 'mg·h/L', color: '#34d399' },
               { label: 'COBERTURA MIC', value: `${coverage}%`, unit: '', color: '#7c6ef8' },
             ].map(v => (
               <div key={v.label} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>

@@ -12,9 +12,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Play, Square, Download, RotateCcw, Copy, Activity, Cpu,
-  CheckCheck, Wifi, WifiOff, AlertCircle,
+  CheckCheck, Wifi, WifiOff, AlertCircle, Settings, Layers,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+
+const API_BASE = (import.meta as any).env?.VITE_BINARY_API_URL || 'http://localhost:8000';
 
 const PANEL = {
   background: 'rgba(10,20,40,0.7)',
@@ -47,34 +49,75 @@ void loop() {
   delay(10);
 }`;
 
-// ─── Osciloscopio ───────────────────────────────────────────────────────────────
-function generateOsciData(time: number, timeBase: number): { x: number; ch1: number }[] {
+// ─── Sensor Presets ───────────────────────────────────────────────────────────────────
+const SENSOR_PRESETS = [
+  {
+    id: 'ecg', label: 'ECG (AD8232)', color: '#00EAD3',
+    code: `void setup() {\n  Serial.begin(9600);\n  pinMode(A0, INPUT); // AD8232 Output\n}\n\nvoid loop() {\n  int ecgValue = analogRead(A0);\n  float voltage = ecgValue * (3.3 / 1023.0);\n  Serial.print("ECG:");\n  Serial.println(voltage, 3);\n  delay(2); // 500 Hz sample rate\n}`,
+    serialGen: (t: number) => `ECG: ${(1.65 + 1.2 * Math.sin(2 * Math.PI * 1.2 * t) * Math.exp(-((t % 0.83 - 0.2) ** 2) / 0.005)).toFixed(3)} V`,
+  },
+  {
+    id: 'pulse_ox', label: 'SpO2 (MAX30102)', color: '#FF2E63',
+    code: `#include <Wire.h>\n// MAX30102 Pulse Oximeter\nvoid setup() {\n  Serial.begin(9600);\n  Wire.begin();\n  // Init MAX30102...\n}\n\nvoid loop() {\n  int irValue = analogRead(A0); // IR LED\n  int redValue = analogRead(A1); // Red LED\n  float ratio = (float)redValue / irValue;\n  int spo2 = (int)(110 - 25 * ratio);\n  int bpm = 60 + (int)(20 * sin(millis() / 1000.0));\n  Serial.print("SpO2: "); Serial.print(spo2);\n  Serial.print("% | BPM: "); Serial.println(bpm);\n  delay(100);\n}`,
+    serialGen: (t: number) => `SpO2: ${Math.round(95 + 3 * Math.sin(t * 0.5))}% | BPM: ${Math.round(72 + 8 * Math.sin(t * 0.3))}`,
+  },
+  {
+    id: 'pressure', label: 'Presión (BMP280)', color: '#FBBF24',
+    code: `#include <Wire.h>\n// BMP280 Barometric Pressure\nvoid setup() {\n  Serial.begin(9600);\n  Wire.begin();\n}\n\nvoid loop() {\n  float pressure = 760 + random(-5, 5) * 0.1;\n  float temp = 36.5 + random(-10, 10) * 0.01;\n  Serial.print("P: "); Serial.print(pressure, 1);\n  Serial.print(" mmHg | T: "); Serial.print(temp, 1);\n  Serial.println(" C");\n  delay(500);\n}`,
+    serialGen: (t: number) => `P: ${(760 + 2 * Math.sin(t * 0.2)).toFixed(1)} mmHg | T: ${(36.5 + 0.1 * Math.sin(t * 0.1)).toFixed(1)} C`,
+  },
+];
+
+const BOARDS = [
+  { id: 'arduino_uno', label: 'Arduino UNO', mcu: 'ATmega328P', flash: '32KB', ram: '2KB' },
+  { id: 'esp32', label: 'ESP32', mcu: 'Xtensa LX6', flash: '4MB', ram: '520KB' },
+  { id: 'stm32', label: 'STM32 Blue Pill', mcu: 'STM32F103', flash: '64KB', ram: '20KB' },
+];
+
+// ─── Osciloscopio ─────────────────────────────────────────────────────────────────────
+function generateOsciData(time: number, timeBase: number, sensorId: string): { x: number; ch1: number }[] {
   const SAMPLES = 200;
   return Array.from({ length: SAMPLES }, (_, i) => {
-    const t = (i / SAMPLES) * timeBase;
-    const freq = 1 / (timeBase * 0.25);
-    const phase = (t * freq + time * 0.1) % 1;
+    const t = (i / SAMPLES) * timeBase / 1000; // convert ms to seconds
+    const tAbs = t + time * 0.1;
     let v = 0;
-    if (phase < 0.1) v = 4 * Math.sin(Math.PI * phase / 0.1);
-    else if (phase < 0.15) v = 0.5;
-    else if (phase < 0.25) v = 0.3 * Math.sin(Math.PI * (phase - 0.15) / 0.1);
-    else if (phase < 0.5) v = 0.1;
-    else if (phase < 0.7) v = 1.2 * Math.sin(Math.PI * (phase - 0.5) / 0.2);
-    else v = 0.1 + 0.1 * Math.sin(2 * Math.PI * (phase - 0.7) / 0.3);
+
+    if (sensorId === 'ecg') {
+      // ECG-like waveform from physiological model
+      const phase = (tAbs * 1.2) % 1;
+      if (phase < 0.09) v = 0.5 * Math.sin(Math.PI * phase / 0.09);
+      else if (phase < 0.16) v = 0.02;
+      else if (phase < 0.22) v = 4.0 * Math.sin(Math.PI * (phase - 0.16) / 0.06);
+      else if (phase < 0.28) v = -0.3 * Math.sin(Math.PI * (phase - 0.22) / 0.06);
+      else if (phase < 0.38) v = 0.02;
+      else if (phase < 0.58) v = 0.8 * Math.sin(Math.PI * (phase - 0.38) / 0.2);
+      else v = 0.02;
+      v = v * 0.8 + 1.65; // Center at 1.65V (half of 3.3V)
+    } else if (sensorId === 'pulse_ox') {
+      // Photoplethysmogram (PPG) waveform
+      const phase = (tAbs * 1.2) % 1;
+      v = 2.5 + 0.3 * Math.exp(-((phase - 0.3) ** 2) / 0.01) - 0.1 * Math.exp(-((phase - 0.5) ** 2) / 0.02);
+    } else {
+      // Pressure sensor: slow wave
+      v = 2.5 + 0.2 * Math.sin(2 * Math.PI * tAbs * 0.1) + 0.05 * Math.sin(2 * Math.PI * tAbs * 0.3);
+    }
+
     return { x: i, ch1: parseFloat((v + (Math.random() - 0.5) * 0.04).toFixed(3)) };
   });
 }
 
 // ─── Componente Principal ────────────────────────────────────────────────────────
 export function MicrocontrollerPage() {
-  const [code, setCode]             = useState(DEFAULT_CODE);
+  const [activeSensor, setActiveSensor] = useState(SENSOR_PRESETS[0]);
+  const [activeBoard, setActiveBoard]   = useState(BOARDS[0]);
+  const [code, setCode]             = useState(SENSOR_PRESETS[0].code);
   const [running, setRunning]       = useState(false);
   const [logLines, setLogLines]     = useState<string[]>([]);
   const [timeBase, setTimeBase]     = useState(100);
   const [amplitude, setAmplitude]   = useState(1);
   const [triggerAuto, setTrigger]   = useState(true);
   const [time, setTime]             = useState(0);
-  const [connected, setConnected]   = useState(false);  // estado real (gestionado por usuario)
+  const [connected, setConnected]   = useState(false);
   const [copyDone, setCopyDone]     = useState(false);
   const intervalRef                 = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -84,8 +127,8 @@ export function MicrocontrollerPage() {
       intervalRef.current = setInterval(() => {
         setTime(t => t + 0.05);
         setLogLines(prev => {
-          const voltage = (Math.random() * 3.5 + 0.1).toFixed(2);
-          const next = [...prev, `Voltaje: ${voltage} V`];
+          const line = activeSensor.serialGen(Date.now() / 1000);
+          const next = [...prev, line];
           return next.length > 30 ? next.slice(-30) : next;
         });
       }, 100);
@@ -99,10 +142,11 @@ export function MicrocontrollerPage() {
   const handleRun = useCallback(() => {
     if (!running) {
       setLogLines([
+        `> Placa: ${activeBoard.label} (${activeBoard.mcu})`,
+        `> Sensor: ${activeSensor.label}`,
         '> Comprobando sintaxis...',
-        '> Compilación exitosa — 0 errores, 0 advertencias',
-        '> Vinculando librerías de Arduino...',
-        '> Carga completada · 2284 bytes (7%) del espacio de programa',
+        `> Compilación exitosa — 0 errores, 0 advertencias`,
+        `> Flash: ${activeBoard.flash} | RAM: ${activeBoard.ram}`,
         '> Monitor serial iniciado a 9600 baud',
         '─────────────────────────────────────────',
       ]);
@@ -131,11 +175,11 @@ export function MicrocontrollerPage() {
 
   // ─── Resetear código ──────────────────────────────────────────────────────────
   const handleReset = useCallback(() => {
-    setCode(DEFAULT_CODE);
+    setCode(activeSensor.code);
     setLogLines([]);
     setRunning(false);
     setTime(0);
-  }, []);
+  }, [activeSensor]);
 
   // ─── Exportar .ino ────────────────────────────────────────────────────────────
   const handleExport = useCallback(() => {
@@ -149,7 +193,7 @@ export function MicrocontrollerPage() {
   }, [code]);
 
   // ─── Datos osciloscopio ────────────────────────────────────────────────────────
-  const data = generateOsciData(time, timeBase);
+  const data = generateOsciData(time, timeBase, activeSensor.id);
   const cursorX   = 72;
   const cursorVal = data[Math.floor(cursorX / 100 * data.length)]?.ch1 ?? 0;
 
@@ -163,13 +207,32 @@ export function MicrocontrollerPage() {
             Emulador de Microcontrolador
           </h1>
           <div className="flex items-center gap-2 text-sm text-[#94A3B8]">
-            <span className="font-mono">septima_sensor.ino</span>
+            <span className="font-mono">{activeBoard.label}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>{activeBoard.mcu}</span>
             {running && (
               <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,234,211,0.08)', color: '#00EAD3' }}>
                 Ejecutando
               </span>
             )}
           </div>
+        </div>
+
+        {/* Sensor Preset Selector */}
+        <div className="flex items-center gap-2">
+          {SENSOR_PRESETS.map(s => (
+            <button
+              key={s.id}
+              onClick={() => { setActiveSensor(s); setCode(s.code); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                background: activeSensor.id === s.id ? `${s.color}15` : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${activeSensor.id === s.id ? `${s.color}40` : 'rgba(255,255,255,0.06)'}`,
+                color: activeSensor.id === s.id ? s.color : '#94A3B8',
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
         </div>
 
         {/* Badge de conexión — real, togglable */}

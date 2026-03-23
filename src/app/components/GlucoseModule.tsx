@@ -14,6 +14,7 @@ import {
 import { Droplets, Activity, Zap, RefreshCw, Cpu, Info } from 'lucide-react';
 import { useGlucoseInsulin } from '../../hooks/useBinaryEngine';
 import { useOrganicAnimation } from '../../hooks/useOrganicAnimation';
+import { ClinicalScenario } from './ClinicalScenario';
 import type {
   GlucoseSimulationRequest,
   GlucoseSimulationResult
@@ -179,6 +180,18 @@ export function GlucoseModule() {
     setGb(p.Gb); setIb(p.Ib); setN(p.n);
   }, []);
 
+  // Clinical case loader
+  const onLoadCase = useCallback((params: Record<string, any>) => {
+    if (params.g0 !== undefined) setG0(params.g0);
+    if (params.i0 !== undefined) setI0(params.i0);
+    if (params.p1 !== undefined) setP1(params.p1);
+    if (params.p2 !== undefined) setP2(params.p2);
+    if (params.p3 !== undefined) setP3(params.p3);
+    if (params.Gb !== undefined) setGb(params.Gb);
+    if (params.Ib !== undefined) setIb(params.Ib);
+    if (params.n  !== undefined) setN(params.n);
+  }, []);
+
   // Valores actuales del final de la simulación
   const finalG = data?.G.at(-1)?.toFixed(1) ?? '—';
   const finalI = data?.I.at(-1)?.toFixed(1) ?? '—';
@@ -234,6 +247,14 @@ export function GlucoseModule() {
             </div>
           </div>
 
+          {/* Clinical Cases */}
+          <ClinicalScenario
+            module="glucose"
+            accentColor="#f59e0b"
+            onLoadCase={onLoadCase}
+            simulationResult={data ? { y: data.t.map((t, i) => [data.G[i], data.I[i]]), params: { p1, p2, p3, Gb, Ib, n } } : undefined}
+          />
+
           {/* Condiciones iniciales */}
           <div className="rounded-2xl p-4" style={PANEL}>
             <div className="text-[#F9FAFB] text-xs font-semibold mb-4">Condiciones Iniciales</div>
@@ -279,22 +300,39 @@ export function GlucoseModule() {
         {/* Panel derecho — Gráficas y resultados */}
         <div className="flex-1 flex flex-col gap-4 overflow-hidden">
 
-          {/* KPIs */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'GLUCOSA PICO', value: peakG, unit: 'mg/dL', color: COLORS.glucose, desc: 'Máxima alcanzada' },
-              { label: 'GLUCOSA FINAL', value: finalG, unit: 'mg/dL', color: COLORS.glucose, desc: 'A los 240 min' },
-              { label: 'INSULINA FINAL', value: finalI, unit: 'µU/mL', color: COLORS.insulin, desc: 'A los 240 min' },
-            ].map(v => (
-              <div key={v.label} className="rounded-xl p-4" style={GLASS}>
-                <div className="text-[#94A3B8] text-[10px] font-semibold uppercase tracking-wider mb-0.5">{v.label}</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold" style={{ color: v.color, fontFamily: 'JetBrains Mono' }}>{v.value}</span>
-                  <span className="text-[#94A3B8] text-xs">{v.unit}</span>
+          {/* KPIs - Métricas Clínicas Calculadas */}
+          <div className="grid grid-cols-3 xl:grid-cols-6 gap-3">
+            {(() => {
+              // Clinical metrics calculations
+              const SI = p3 / p2;  // Insulin Sensitivity Index
+              const SG = p1;       // Glucose Effectiveness
+              // AUC (trapezoidal rule)
+              const aucG = data ? data.t.reduce((acc, t, i) => {
+                if (i === 0) return 0;
+                const dt_step = data.t[i] - data.t[i - 1];
+                return acc + ((data.G[i] + data.G[i - 1]) / 2) * dt_step;
+              }, 0) : 0;
+              // Time to return to basal (within 10%)
+              const tReturn = data ? data.t.find((_, i) => i > 10 && Math.abs(data.G[i] - Gb) / Gb < 0.1) ?? data.t.at(-1) ?? 0 : 0;
+
+              return [
+                { label: 'GLUCOSA PICO', value: peakG, unit: 'mg/dL', color: COLORS.glucose, desc: 'Máxima alcanzada' },
+                { label: 'GLUCOSA FINAL', value: finalG, unit: 'mg/dL', color: COLORS.glucose, desc: `A los 240 min` },
+                { label: 'INSULINA FINAL', value: finalI, unit: 'µU/mL', color: COLORS.insulin, desc: 'A los 240 min' },
+                { label: 'SI (SENSIBILIDAD)', value: SI.toExponential(2), unit: '', color: COLORS.action, desc: 'p3/p2 · Índice insulínico' },
+                { label: 'SG (EFICACIA)', value: (SG * 100).toFixed(1), unit: '%/min', color: '#f59e0b', desc: 'Captación glucosa basal' },
+                { label: 'AUC GLUCOSA', value: aucG > 0 ? (aucG / 1000).toFixed(1) : '—', unit: '×10³', color: '#34d399', desc: `Retorno basal: ${tReturn > 0 ? Math.round(tReturn) + ' min' : '—'}` },
+              ].map(v => (
+                <div key={v.label} className="rounded-xl p-3" style={GLASS}>
+                  <div className="text-[#94A3B8] text-[9px] font-semibold uppercase tracking-wider mb-0.5">{v.label}</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold" style={{ color: v.color, fontFamily: 'JetBrains Mono' }}>{v.value}</span>
+                    <span className="text-[#94A3B8] text-[10px]">{v.unit}</span>
+                  </div>
+                  <div className="text-[#94A3B8] text-[9px] mt-0.5">{v.desc}</div>
                 </div>
-                <div className="text-[#94A3B8] text-[10px] mt-0.5">{v.desc}</div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
 
           {/* Gráfica de Glucosa (principal) */}
